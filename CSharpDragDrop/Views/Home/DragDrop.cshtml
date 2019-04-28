@@ -1,0 +1,114 @@
+﻿@model List<CSharpDragDrop.Models.Country>
+@inject IJsonHelper Json;
+@using System.Collections.Generic;
+
+@{
+    <script type="text/javascript">
+        function drag(ev) {
+            console.log('dragging');
+            ev.dataTransfer.setData("source", $(ev.target).attr('id'));
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            console.log('dropped');
+
+            let sourceElementId = ev.dataTransfer.getData("source");
+            let destinationElementId = $(ev.target).attr('id');
+
+            let sourceId = parseInt(document.querySelector("#tableview #" + sourceElementId + " td.Id").textContent);
+            let sourceName = document.querySelector("#tableview #" + sourceElementId + " td.Name").textContent;
+            let source = { Id: sourceId, Name: sourceName };
+
+            let parentClassName = document.querySelector("#treeview #" + destinationElementId).parentElement.className;
+            let destinationId = parseInt(document.querySelector("#treeview ." + parentClassName + " div.Id").textContent);
+            let destinationName = document.querySelector("#treeview div." + parentClassName + " div.Name").textContent;
+            let destination = { Id: destinationId, Name: destinationName };
+
+            $.ajax({
+                type: "POST",
+                url: "https://localhost:44375/api/home/update",
+                data: {
+                    source: source, destination: destination
+                },
+                success: function () {
+                    window.location.reload();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(xhr.responseText);
+                }
+            });
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+    </script>
+
+    <h2>Grid View</h2>
+    <table class="table" id="tableview">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().Name)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="doc-item1">
+            @foreach (var country in Model)
+            {
+                <tr id="Country_@country.Id" draggable="true" ondragstart="drag(event)">
+                    <td class="Id">
+                        @Html.DisplayFor(modelItem => country.Id)
+                    </td>
+                    <td class="Name">
+                        @Html.DisplayFor(modelItem => country.Name)
+                    </td>
+                </tr>
+                @foreach (var state in country.States)
+                {
+                    <tr id="State_@state.Id" draggable="true" ondragstart="drag(event)">
+                        <td class="Id">
+                            @Html.DisplayFor(modelItem => state.Id)
+                        </td>
+                        <td class="Name">
+                            @Html.DisplayFor(modelItem => state.Name)
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <br /><br /><br /><br />
+    <h2>Tree View</h2>
+    <hr />
+    <ul id="treeview">
+        @foreach (Country country in Model)
+        {
+            <li ondrop="drop(event)" ondragover="allowDrop(event)">
+                <div class="country_parent">
+                    <div class="Id" style="display:none">@Html.DisplayFor(x => country.Id)</div>
+                    <div id="Country_@country.Id" class="Name">@Html.DisplayFor(x => country.Name)</div>
+                    @if (country.States.Count > 0)
+                    {
+                        <ul>
+                            @foreach (State state in country.States)
+                            {
+                                <li ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <div class="state_parent">
+                                        <div id="State_@state.Id" class="Id" style="display:none">@Html.DisplayFor(x => state.Id)</div>
+                                        <div id="State_@state.Id" class="Name">@Html.DisplayFor(x => state.Name)</div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </li>
+        }
+    </ul>
+}
