@@ -9,8 +9,7 @@ namespace CSharpDragDrop.Controllers
     public class HomeController : Controller
     {
         public UpdateAC _list;
-        public bool isUpdate = false;
-
+        
         public HomeController(UpdateAC list)
         {
             _list = list;
@@ -38,10 +37,9 @@ namespace CSharpDragDrop.Controllers
             }
         }
 
-        [HttpPost("api/home/update")]
+        [HttpPost("api/update")]
         public IActionResult Update(UpdateAC updateAc)
         {
-            isUpdate = true;
             updateAc.Source.Name = updateAc.Source.Name.Trim();
             updateAc.Destination.Name = updateAc.Destination.Name.Trim();
 
@@ -61,33 +59,5 @@ namespace CSharpDragDrop.Controllers
 
             return Ok();
         }
-
-        //public void GetCountries()
-        //{
-        //    countriesList = new List<Country>();
-        //    for (int i = 0; i < 5; i++)
-        //    {
-        //        countriesList.Add(new Country
-        //        {
-        //            Id = i + 1,
-        //            Name = "Country_" + (i + 1)
-        //        });
-        //    }
-        //}
-
-        //public void GetStates()
-        //{
-        //    Random rand = new Random();
-        //    statesList = new List<State>();
-        //    for (int i = 0; i < 20; i++)
-        //    {
-        //        statesList.Add(new State
-        //        {
-        //            Id = i + 1,
-        //            Name = "State_" + (i + 1),
-        //            CountryId = rand.Next(1, countriesList.Count)
-        //        });
-        //    }
-        //}
     }
 }
