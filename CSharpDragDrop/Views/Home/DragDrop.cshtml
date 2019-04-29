@@ -16,13 +16,22 @@
             let sourceElementId = ev.dataTransfer.getData("source");
             let destinationElementId = $(ev.target).attr('id');
 
+            // Source
             let sourceId = parseInt(document.querySelector("#tableview #" + sourceElementId + " td.Id").textContent);
             let sourceName = document.querySelector("#tableview #" + sourceElementId + " td.Name").textContent;
             let source = { Id: sourceId, Name: sourceName };
 
-            let parentClassName = document.querySelector("#treeview #" + destinationElementId).parentElement.className;
-            let destinationId = parseInt(document.querySelector("#treeview ." + parentClassName + " div.Id").textContent);
-            let destinationName = document.querySelector("#treeview div." + parentClassName + " div.Name").textContent;
+            // Destination
+            let destinationQuerySelector = document.querySelector("#treeview #" + destinationElementId);
+            let parentClassName = (destinationQuerySelector === null || destinationQuerySelector === undefined)
+                ? null
+                : destinationQuerySelector.parentElement.className;
+            let destinationId = parentClassName === null
+                ? -1
+                : parseInt(document.querySelector("#treeview ." + parentClassName + " div.Id").textContent);
+            let destinationName = parentClassName === null
+                ? null
+                : document.querySelector("#treeview div." + parentClassName + " div.Name").textContent;
             let destination = { Id: destinationId, Name: destinationName };
 
             $.ajax({
@@ -47,11 +56,12 @@
 
     <div style="float:left; margin-right: 5px; margin-right: 10px;">
         <h2>Tree View</h2>
-        <ul id="treeview" style="display:inline-block; width: 100px; margin-right: 50px">
+        <ul id="treeview" style="display:inline-block; width: 150px; height: 900px; overflow-y:scroll; overflow-x: scroll; margin-right: 50px" 
+            ondrop="drop(event)" ondragover="allowDrop(event)">
             @foreach (Country country in Model)
             {
-                <li ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="country_parent">
+                <li>
+                    <div class="country_parent_@country.Id">
                         <div class="Id" style="display:none">@Html.DisplayFor(x => country.Id)</div>
                         <div id="Country_@country.Id" class="Name">@Html.DisplayFor(x => country.Name)</div>
                         @if (country.States.Count > 0)
@@ -60,7 +70,7 @@
                                 @foreach (State state in country.States)
                                 {
                                     <li ondrop="drop(event)" ondragover="allowDrop(event)">
-                                        <div class="state_parent">
+                                        <div class="state_parent_@state.Id">
                                             <div id="State_@state.Id" class="Id" style="display:none">@Html.DisplayFor(x => state.Id)</div>
                                             <div id="State_@state.Id" class="Name">@Html.DisplayFor(x => state.Name)</div>
                                         </div>
@@ -73,7 +83,7 @@
             }
         </ul>
 
-        <table class="table" style="display:inline-block; width: 900px; height:500px; overflow-y:scroll; margin-left: 50px">
+        <table class="table" style="display:inline-block; width: 500px; height:500px; overflow-y:scroll; margin-left: 50px">
             <thead>
                 <tr><th colspan="3"><h2>Grid View (All)</h2></th></tr>
                 <tr>
