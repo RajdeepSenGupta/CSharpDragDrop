@@ -4,6 +4,19 @@
 
 @{
     <script type="text/javascript">
+        $(document).ready(function () {
+            //var toggler = document.getElementsByClassName("caret");
+            var toggler = document.getElementsByClassName("togglecheckbox");
+            var i;
+
+            for (i = 0; i < toggler.length; i++) {
+                toggler[i].addEventListener("click", function () {
+                    this.parentElement.parentElement.querySelector(".nested").classList.toggle("active");
+                    this.classList.toggle("caret-down");
+                });
+            }
+        });
+
         function drag(ev) {
             console.log('dragging');
             ev.dataTransfer.setData("source", $(ev.target).attr('id'));
@@ -54,19 +67,71 @@
         }
     </script>
 
-    <div style="float:left; margin-right: 5px; margin-right: 10px;">
-        <h2>Tree View</h2>
-        <ul id="treeview" style="display:inline-block; width: 150px; height: 900px; overflow-y:scroll; overflow-x: scroll; margin-right: 50px" 
-            ondrop="drop(event)" ondragover="allowDrop(event)">
-            @foreach (Country country in Model)
-            {
-                <li>
-                    <div class="country_parent_@country.Id">
-                        <div class="Id" style="display:none">@Html.DisplayFor(x => country.Id)</div>
-                        <div id="Country_@country.Id" class="Name">@Html.DisplayFor(x => country.Name)</div>
-                        @if (country.States.Count > 0)
-                        {
-                            <ul>
+    <style>
+        .sidepanel {
+            float: left;
+            width: 15%;
+            height: 900px;
+            overflow-x: scroll;
+        }
+
+        .grids {
+            margin-left: 30%;
+        }
+
+        .table1 table {
+            width: 100%;
+            float: left;
+        }
+
+        .table1 {
+            height: 200px;
+            overflow-y: scroll;
+        }
+
+        th, td {
+            text-align: left;
+        }
+
+        .lefttable2 table {
+            width: 40%;
+            padding: 10px;
+            float: left;
+        }
+
+        .righttable2 table {
+            width: 40%;
+            padding: 10px;
+            margin-left: 150px;
+        }
+
+        ul, #treeview {
+            list-style-type: none;
+        }
+
+        .nested {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+
+    <div>
+        <div class="sidepanel">
+            <h2 style="text-align:center;">Tree View</h2>
+            <ul id="treeview" ondrop="drop(event)" ondragover="allowDrop(event)">
+                @foreach (Country country in Model)
+                {
+                    <li>
+                        <div class="country_parent_@country.Id">
+                            <div class="Id" style="display:none">@Html.DisplayFor(x => country.Id)</div>
+                            <div id="Country_@country.Id" class="Name">
+                                <input type="checkbox" class="togglecheckbox" />
+                                @Html.DisplayFor(x => country.Name)
+                            </div>
+                            <ul class="nested">
                                 @foreach (State state in country.States)
                                 {
                                     <li ondrop="drop(event)" ondragover="allowDrop(event)">
@@ -77,106 +142,113 @@
                                     </li>
                                 }
                             </ul>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div class="grids">
+            <div class="table1">
+                <table id="tableview">
+                    <thead>
+                        <tr><th colspan="3" style="text-align:left !important;"><h2>Grid View (All)</h2></th></tr>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.First().Id)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.First().Name)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="doc-item1">
+                        @foreach (var country in Model)
+                        {
+                            <tr id="Country_@country.Id" draggable="true" ondragstart="drag(event)">
+                                <td class="Id">
+                                    @Html.DisplayFor(modelItem => country.Id)
+                                </td>
+                                <td class="Name">
+                                    @Html.DisplayFor(modelItem => country.Name)
+                                </td>
+                            </tr>
+                            @foreach (var state in country.States)
+                            {
+                                <tr id="State_@state.Id" draggable="true" ondragstart="drag(event)">
+                                    <td class="Id">
+                                        @Html.DisplayFor(modelItem => state.Id)
+                                    </td>
+                                    <td class="Name">
+                                        @Html.DisplayFor(modelItem => state.Name)
+                                    </td>
+                                </tr>
+                            }
                         }
-                    </div>
-                </li>
-            }
-        </ul>
-
-        <table class="table" style="display:inline-block; width: 500px; height:500px; overflow-y:scroll; margin-left: 50px">
-            <thead>
-                <tr><th colspan="3"><h2>Grid View (All)</h2></th></tr>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.First().Id)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.First().Name)
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="doc-item1">
-                @foreach (var country in Model)
-                {
-                    <tr id="Country_@country.Id" draggable="true" ondragstart="drag(event)">
-                        <td class="Id">
-                            @Html.DisplayFor(modelItem => country.Id)
-                        </td>
-                        <td class="Name">
-                            @Html.DisplayFor(modelItem => country.Name)
-                        </td>
-                    </tr>
-                    @foreach (var state in country.States)
-                    {
-                        <tr id="State_@state.Id" draggable="true" ondragstart="drag(event)">
-                            <td class="Id">
-                                @Html.DisplayFor(modelItem => state.Id)
-                            </td>
-                            <td class="Name">
-                                @Html.DisplayFor(modelItem => state.Name)
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div style="float:right; margin-right: 5px;">
-        <table class="table" id="tableview" style="display:inline-block; width: 500px; height:500px; overflow-y: scroll;">
-            <thead>
-                <tr><th colspan="3"><h2>Grid View (Country)</h2></th></tr>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.First().Id)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.First().Name)
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="doc-item1">
-                @foreach (var country in Model)
-                {
-                    <tr id="Country_@country.Id" draggable="true" ondragstart="drag(event)">
-                        <td class="Id">
-                            @Html.DisplayFor(modelItem => country.Id)
-                        </td>
-                        <td class="Name">
-                            @Html.DisplayFor(modelItem => country.Name)
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <table class="table" id="tableview" style="display:inline-block; width: 500px; height:500px; overflow-y: scroll;">
-            <thead>
-                <tr><th colspan="3"><h2>Grid View (State)</h2></th></tr>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.First().States.First().Id)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.First().States.First().Name)
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="doc-item1">
-                @foreach (var country in Model)
-                {
-                    @foreach (var state in country.States)
-                    {
-                        <tr id="State_@state.Id" draggable="true" ondragstart="drag(event)">
-                            <td class="Id">
-                                @Html.DisplayFor(modelItem => state.Id)
-                            </td>
-                            <td class="Name">
-                                @Html.DisplayFor(modelItem => state.Name)
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+            <div class="subgrids">
+                <div class="lefttable2">
+                    <table>
+                        <thead>
+                            <tr><th colspan="3"><h2>Grid View (Country)</h2></th></tr>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.First().Id)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.First().Name)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="doc-item1">
+                            @foreach (var country in Model)
+                            {
+                                <tr id="Country_@country.Id" draggable="true" ondragstart="drag(event)">
+                                    <td class="Id">
+                                        @Html.DisplayFor(modelItem => country.Id)
+                                    </td>
+                                    <td class="Name">
+                                        @Html.DisplayFor(modelItem => country.Name)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="righttable2">
+                    <table id="tableview">
+                        <thead>
+                            <tr><th colspan="3"><h2>Grid View (State)</h2></th></tr>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.First().States.First().Id)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.First().States.First().Name)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="doc-item1">
+                            @foreach (var country in Model)
+                            {
+                                @foreach (var state in country.States)
+                                {
+                                    <tr id="State_@state.Id" draggable="true" ondragstart="drag(event)">
+                                        <td class="Id">
+                                            @Html.DisplayFor(modelItem => state.Id)
+                                        </td>
+                                        <td class="Name">
+                                            @Html.DisplayFor(modelItem => state.Name)
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 }
