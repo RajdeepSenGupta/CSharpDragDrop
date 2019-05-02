@@ -9,7 +9,7 @@ namespace CSharpDragDrop.Controllers
     public class HomeController : Controller
     {
         public UpdateAC _list;
-        
+
         public HomeController(UpdateAC list)
         {
             _list = list;
@@ -52,7 +52,7 @@ namespace CSharpDragDrop.Controllers
             {
                 return BadRequest("State can not be moved into other state");
             }
-            else if(updateAc.Destination.Id == -1 && updateAc.Source.Name.ToLowerInvariant().Contains("country"))
+            else if (updateAc.Destination.Id == -1 && updateAc.Source.Name.ToLowerInvariant().Contains("country"))
             {
                 _list.CountryList.Add(new Country()
                 {
@@ -60,7 +60,7 @@ namespace CSharpDragDrop.Controllers
                     Name = "Country_" + (_list.CountryList.Count + 1)
                 });
             }
-            else if(updateAc.Destination.Id == -1 && updateAc.Source.Name.ToLowerInvariant().Contains("state"))
+            else if (updateAc.Destination.Id == -1 && updateAc.Source.Name.ToLowerInvariant().Contains("state"))
             {
                 return BadRequest("State should be inside a country");
             }
@@ -71,5 +71,50 @@ namespace CSharpDragDrop.Controllers
 
             return Ok();
         }
+
+        [HttpPost("api/delete")]
+        public IActionResult DeleteElement(ObjectDef obj)
+        {
+            return Ok();
+        }
+
+        [HttpPost("api/select")]
+        public IActionResult ItemClicked(ObjectDef obj)
+        {
+            return Ok();
+        }
+
+        [HttpGet]
+        public IActionResult GetData()
+        {
+            List<TreeData> treeDataList = new List<TreeData>();
+
+            treeDataList = _list.CountryList.Select(x => new TreeData()
+            {
+                id = x.Id,
+                name = x.Name,
+                parentId = null,
+                hasChildren = x.States.Count > 0,
+                children = x.States.Select(y => new TreeData()
+                {
+                    id = y.Id,
+                    name = y.Name,
+                    parentId = y.CountryId,
+                }).ToList()
+            }).ToList();
+
+            return Ok(treeDataList);
+        }
+    }
+
+    public class TreeData
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string text { get; set; }
+        public int? parentId { get; set; }
+        public string imageCssClass { get; set; }
+        public bool hasChildren { get; set; }
+        public virtual List<TreeData> children { get; set; }
     }
 }

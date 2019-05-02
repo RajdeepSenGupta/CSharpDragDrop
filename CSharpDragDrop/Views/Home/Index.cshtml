@@ -1,179 +1,28 @@
 ﻿@model List<CSharpDragDrop.Models.Country>
-@using ShieldUI.AspNetCore.Mvc;
-@inject IJsonHelper Json;
-@using System.Collections.Generic;
+@using Kendo.Mvc.UI;
 
 @{
-    // Setup data
-    List<dynamic> data = new List<dynamic>();
-    foreach (Country country in Model)
-    {
-        dynamic countryObj = new
-        {
-            text = country.Name,
-            expanded = true,
-            iconCls = "fa fa-folder",
-            items = new List<dynamic>()
-        };
-        foreach (State state in country.States)
-        {
-            dynamic stateObj = new
-            {
-                text = state.Name
-            };
-            countryObj.items.Add(stateObj);
-        }
-        data.Add(countryObj);
-    }
+    
+
 
     <script type="text/javascript">
         $(document).ready(function () {
-            // Grid View
-            $("#example").dataTable({
-                "stripeClasses": [],
-                aLengthMenu: [10],
-                "pagingType": "simple"
-            });
-            $('#example tbody').on('click', 'tr', function () {
-                $(this).toggleClass('selected');
-            });
-            $("#example tbody").sortable({
-                revert: true,
-                helper: function (e, item) {
-                    if (!item.hasClass('selected')) item.addClass('selected');
-                    var elements = $('.selected').not('.ui-sortable-placeholder').clone();
-                    var helper = $('<table />');
-                    item.siblings('.selected').addClass('hidden');
-                    return helper.append(elements);
-                },
-                start: function (e, ui) {
-                    var elements = ui.item.siblings('.selected.hidden').not('.ui-sortable-placeholder');
-                    ui.item.data('items', elements);
-                },
-                update: function (e, ui) {
-                    ui.item.after(ui.item.data("items"));
-                },
-                stop: function (e, ui) {
-                    ui.item.siblings('.selected').removeClass('hidden');
-                    $('tr.selected').removeClass('selected');
-                }
-            });
-
-            // Tree View
-            window.droppableOver = function (e) {
-                if (!e.valid) {
-                    if ($(e.draggable).hasClass('doc-item1') || $(e.draggable).hasClass('doc-item2')) {
-                        e.valid = true;
-                    }
-                }
-            };
-            window.drop = function (e) {
-                console.log(e);
-                var valid = e.valid;
-                if (!valid) {
-                    if ($(e.draggable).hasClass('doc-item1') || $(e.draggable).hasClass('doc-item2')) {
-                        valid = true;
-                    }
-                }
-                if (valid) {
-                    if (e.sourceNode) {
-                        this.append(e.sourceNode, e.targetNode);
-                    }
-                    else {
-                        this.append({ text: $(e.draggable).html() }, e.targetNode);
-                        $(e.draggable).remove();
-                    }
-                    e.skipAnimation = true;
-                }
-            };
-            $(".doc-item1 .doc-item2").shieldDraggable({
-                scope: "treeview-dd-scope",
-                helper: function () {
-                    return $(this.element).clone().appendTo(document.body);
-                },
-                events: {
-                    stop: function (e) {
-                        e.preventDefault();
-                    }
+            
+            $.ajax({
+                type: "GET",
+                url: "https://localhost:44375/Home/GetData",
+                success: function (res) {
+                    console.log(res);
                 }
             });
         });
     </script>
 
-    <style>
-        table {
-            border-collapse: collapse;
-        }
+    <div id="tree">
+        
+    </div>
 
-            table thead tr {
-                margin-left: 20px;
-            }
-
-            table tbody tr {
-                border: 1px solid #ccc;
-            }
-
-        tr-selecting {
-            background: #FECA40;
-        }
-
-        .selected {
-            background: #ff6a00;
-            color: white;
-            cursor: move;
-        }
-
-        .dataTables_filter {
-            display: none;
-        }
-
-        .dataTables_length {
-            display: none !important;
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
-
-    <h2>Grid View</h2>
-    <table class="table" id="example">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().Id)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().Name)
-                </th>
-            </tr>
-        </thead>
-        <tbody class="doc-item1">
-            @foreach (var country in Model)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => country.Id)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => country.Name)
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <br /><br /><br /><br />
-    <h2>Tree View</h2>
-    <hr />
-    <div id="treeview" class="doc-item2"></div>
-
-    @(Html.ShieldTreeView()
-                           .Name("treeview")
-                           .DragDrop(true)
-                           .DragDropScope("treeview-dd-scope")
-                           .DataSource(ds => ds.Data(data.ToArray()))
-                           .Events(ev => ev.DroppableOver(@<text>droppableOver</text>)
-                                                   .Drop(@<text>drop</text>))
-    )
+    <div class="table">
+        
+    </div>
 }

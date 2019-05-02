@@ -5,7 +5,6 @@
 @{
     <script type="text/javascript">
         $(document).ready(function () {
-            //var toggler = document.getElementsByClassName("caret");
             var toggler = document.getElementsByClassName("togglecheckbox");
             var i;
 
@@ -64,6 +63,38 @@
 
         function allowDrop(ev) {
             ev.preventDefault();
+        }
+
+        function deleteElem(id, type) {
+            $.ajax({
+                type: "POST",
+                url: "https://localhost:44375/api/delete",
+                data: {
+                    id: id, type: type
+                },
+                success: function () {
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(xhr.responseText);
+                }
+            });
+        }
+
+        function itemClicked(id, type) {
+            $.ajax({
+                type: "POST",
+                url: "https://localhost:44375/api/select",
+                data: {
+                    id: id, type: type
+                },
+                success: function () {
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(xhr.responseText);
+                }
+            });
         }
     </script>
 
@@ -124,20 +155,28 @@
             <ul id="treeview" ondrop="drop(event)" ondragover="allowDrop(event)">
                 @foreach (Country country in Model)
                 {
-                    <li>
+                    <li onclick="itemClicked(@country.Id, 'Country')">
                         <div class="country_parent_@country.Id">
                             <div class="Id" style="display:none">@Html.DisplayFor(x => country.Id)</div>
                             <div id="Country_@country.Id" class="Name">
                                 <input type="checkbox" class="togglecheckbox" />
                                 @Html.DisplayFor(x => country.Name)
+                                <a class="deleteButton" onclick="deleteElem(@country.Id, 'Country')">
+                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                </a>
                             </div>
                             <ul class="nested">
                                 @foreach (State state in country.States)
                                 {
-                                    <li ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <li ondrop="drop(event)" ondragover="allowDrop(event)" onclick="itemClicked(@state.Id, 'State')">
                                         <div class="state_parent_@state.Id">
                                             <div id="State_@state.Id" class="Id" style="display:none">@Html.DisplayFor(x => state.Id)</div>
-                                            <div id="State_@state.Id" class="Name">@Html.DisplayFor(x => state.Name)</div>
+                                            <div id="State_@state.Id" class="Name">
+                                                @Html.DisplayFor(x => state.Name)
+                                                <a class="deleteButton" onclick="deleteElem(@state.Id, 'State')">
+                                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                                </a>
+                                            </div>
                                         </div>
                                     </li>
                                 }
